@@ -19,17 +19,17 @@ Finally, I could make use of these notes to create a basic song based off of cel
 
 **Dependencies**
 
-You will need Pyechonest to use playlist.py.
+You will need Pyechonest to use PlayMelody.py.
 
 **Resources**
 
-1. [Tempo Shift Example]
+1. [Free Sound]
 
 2. [Modify]
 
 3. [AQ Player]
 
-4. [Free Sound]
+4. [Chord Probabilities]
 
 5. [Recurse Through Directory]
 
@@ -39,11 +39,10 @@ You will need Pyechonest to use playlist.py.
 
 8. [Extracting Melody]
 
-9. [Chord Probabilities]
+9. [Wolfram Tones]
 
 10. [Molecular Music Box]
 
-11. [Wolfram Tones]
 
 **How To Mimic A Melody**
 
@@ -55,11 +54,67 @@ python PlayMelody.py NoteList HappyBirthday.mp3 HappyMelody.mp3
 
 **Code Explanation**
 
+The program begins by initializing three empty lists, one to hold the semitones, one to hold all the pitches, and one to hold the newly created song. It then runs through the given directory and adds the semitones to a list. The following code, inspired by [Recursing Through Directory], iterates through a directory and makes a list containing each of the 12 semitones:
 
+```python
+AUDIO_EXTENSIONS = set(['mp3', 'm4a', 'wav', 'ogg', 'au', 'mp4'])
 
-[Tempo Shift Example]: https://github.com/echonest/remix/blob/master/examples/stretch/beatshift.py
+def createSemitones(directory, notes):
+    for f in os.listdir(directory):
+        if _isAudio(f):
+            path = os.path.join(directory, f)
+            _addOneNote(path, notes)
+
+def _addOneNote(path, notes):
+    audiofile = audio.LocalAudioFile(path)
+    notes.append(audiofile)
+
+def _isAudio(f):
+    _, ext = os.path.splitext(f)
+    ext = ext[1:]
+    return ext in AUDIO_EXTENSIONS
+```
+
+After the semitone list is created, they are loaded into the total list of pitches and then they are used to add multiple octaves to the list of pitches. The following methods take the total list of pitches, the list of semitones, and the desired shift in octave as paramaters and adds all the semitones in the desired octave to the total list of pitches:
+
+```python
+def addOctave(semitones, octaves, noteList):
+    for note in semitones:
+        changeOneNoteOctave(note, noteList, octaves)
+
+def changeOneNoteOctave(note, noteList, octaves):
+    soundtouch = modify.Modify()
+    new_note = soundtouch.shiftPitchOctaves(note, octaves)
+    noteList.append(new_note)
+```
+
+In the .wav file containing the pitch A from [Free Sound], the frequency is 220 Hz, this the 4 octaves above and the 3 octaves below this semitone must be added to span the entire range of an 88-key piano. The following code adds the 3 octaves below and the 4 octaves above the given pitches to the list of total pitches:
+
+```python
+for note in semitones:
+        noteList.append(note)
+    for i in range(1,4):
+        addOctave(semitones, i, noteList)
+    for i in range(1,3):
+        addOctave(semitones, i*-1, noteList)
+```
+
+Finally, once the total list of pitches has been created, the program uses them to create the melody of the chosen song. For each pitch in the song, the program determines the most similar pitch and appends that to a list. Once the song has been fully analyzed, the list is encoded as a .mp3 with the chosen name. The following code iterates through the pitches of a song and recreates the melody:
+
+```python
+for i in range(len(songPitches)):
+        for j in range(len(noteList)):
+            notePitches = noteList[j].pitches
+            dist = distFinder.cosine(songPitches[i], notePitches[0]) 
+            if dist < bmd:
+                bmd = dist
+                bmi = j
+        collect.append(noteList[bmi])
+  out = audio.assemble(collect)
+  out.encode(output_filename)
+```
+
 [Modify]: http://echonest.github.io/remix/apidocs/echonest.remix.modify.Modify-class.html
-[AQ Player]: https://github.com/jlstack/PythonEchonestRemix/tree/master/aqplayer
 [Free Sound]: http://www.freesound.org/people/pinkyfinger/packs/4409/
 [Recurse Through Directory]: https://github.com/echonest/pyechonest/blob/master/examples/show_attrs.py
 [Python Audio]: https://wiki.python.org/moin/Audio/
