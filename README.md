@@ -27,7 +27,7 @@ You will need Pyechonest to use PlayMelody.py.
 
 2. [Modify]
 
-3. [AQ Player]
+3. [Extracting Melody]
 
 4. [Chord Probabilities]
 
@@ -37,11 +37,9 @@ You will need Pyechonest to use PlayMelody.py.
 
 7. [Echonest]
 
-8. [Extracting Melody]
+8. [Molecular Music Box]
 
 9. [Wolfram Tones]
-
-10. [Molecular Music Box]
 
 
 **How To Mimic A Melody**
@@ -75,6 +73,7 @@ def _isAudio(f):
     return ext in AUDIO_EXTENSIONS
 ```
 
+
 After the semitone list is created, they are loaded into the total list of pitches and then they are used to add multiple octaves to the list of pitches. The following methods take the total list of pitches, the list of semitones, and the desired shift in octave as paramaters and adds all the semitones in the desired octave to the total list of pitches:
 
 ```python
@@ -88,6 +87,7 @@ def changeOneNoteOctave(note, noteList, octaves):
     noteList.append(new_note)
 ```
 
+
 In the .wav file containing the pitch A from [Free Sound], the frequency is 220 Hz, this the 4 octaves above and the 3 octaves below this semitone must be added to span the entire range of an 88-key piano. The following code adds the 3 octaves below and the 4 octaves above the given pitches to the list of total pitches:
 
 ```python
@@ -98,6 +98,7 @@ for note in semitones:
     for i in range(1,3):
         addOctave(semitones, i*-1, noteList)
 ```
+
 
 Finally, once the total list of pitches has been created, the program uses them to create the melody of the chosen song. For each pitch in the song, the program determines the most similar pitch and appends that to a list. Once the song has been fully analyzed, the list is encoded as a .mp3 with the chosen name. The following code iterates through the pitches of a song and recreates the melody:
 
@@ -113,6 +114,7 @@ for i in range(len(songPitches)):
   out = audio.assemble(collect)
   out.encode(output_filename)
 ```
+
 
 [Modify]: http://echonest.github.io/remix/apidocs/echonest.remix.modify.Modify-class.html
 [Free Sound]: http://www.freesound.org/people/pinkyfinger/packs/4409/
